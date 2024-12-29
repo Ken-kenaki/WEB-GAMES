@@ -1,164 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Snake</title>
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-        }
-        #canvas {
-            width: 500px;
-            height: 500px;
-            border: 1px solid black;
-            transform: translateX(calc(50vw - 250px));
-       }
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      #canvas {
+        width: 500px;
+        height: 500px;
+        border: 1px solid black;
+        transform: translateX(calc(50vw - 250px));
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <canvas id="canvas"></canvas>
 
-
     <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const canvasWidth = canvas.width = 500;
-        const canvasHeight = canvas.height = 500;
-        const cellSize = 25;
-        const snakeColor = 'red';
-        const foodColor = 'green';
-        const snake = [
-            {x: 0, y: 0}
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+      const canvasWidth = (canvas.width = 500);
+      const canvasHeight = (canvas.height = 500);
+      const cellSize = 25;
+      const snakeColor = "red";
+      const foodColor = "green";
+      const snake = [{ x: 0, y: 0 }];
 
-        ];
+      let userActive = false;
+      let xVelocity = 0;
+      let yVelocity = 0;
+      let foodX;
+      let foodY;
+      let score = 0;
 
-        let userActive = false;
-        let xVelocity = 0;
-        let yVelocity = 0;
-        let foodX;
-        let foodY;
-        let score = 0;
+      // 38 39 40 37
 
+      function GameRunning() {
+        userActive = true;
+        food();
+        drawFood();
+        animation();
+        drawSnake();
+        console.log("Game is running");
+        moveSnake();
+      }
 
+      function food() {
+        foodX = Math.floor(Math.random() * (canvasWidth / cellSize)) * cellSize;
+        foodY =
+          Math.floor(Math.random() * (canvasHeight / cellSize)) * cellSize;
+      }
 
-// 38 39 40 37
+      // food();
 
+      function drawFood() {
+        ctx.fillStyle = foodColor;
+        ctx.fillRect(foodX, foodY, cellSize, cellSize);
+      }
 
+      // food();
 
-        function GameRunning(){
-            userActive = true;
-            food();
-            drawFood();
-            animation();
-            drawSnake();
-            console.log('Game is running');
-            moveSnake();
+      function animation() {
+        setTimeout(() => {
+          moveSnake();
 
+          clearBoard();
+          drawSnake();
+          animation();
+          drawFood();
+        }, 100);
+      }
+
+      function clearBoard() {
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+      }
+
+      function drawSnake() {
+        snake.forEach((cell) => {
+          ctx.fillStyle = snakeColor;
+          ctx.fillRect(cell.x, cell.y, cellSize, cellSize);
+          ctx.strokeStyle = "black";
+          ctx.strokeRect(cell.x, cell.y, cellSize, cellSize);
+        });
+      }
+
+      function userInput() {
+    window.addEventListener('keydown', (e) => {
+        if ((e.keyCode === 37 && xVelocity === 0)) { // Left
+            xVelocity = -cellSize;
+            yVelocity = 0;
         }
-
-        function food(){
-            foodX = Math.floor(Math.random() * (canvasWidth / cellSize)) * cellSize;
-            foodY = Math.floor(Math.random() * (canvasHeight / cellSize)) * cellSize;
+        if ((e.keyCode === 38 && yVelocity === 0)) { // Up
+            xVelocity = 0;
+            yVelocity = -cellSize;
         }
-
-        // food();
-
-
-        function drawFood(){
-            ctx.fillStyle = foodColor;
-            ctx.fillRect(foodX, foodY, cellSize, cellSize);
+        if ((e.keyCode === 39 && xVelocity === 0)) { // Right
+            xVelocity = cellSize;
+            yVelocity = 0;
         }
-
-        // food();
-
-
-        function animation(){
-            setTimeout(() => {
-                clearBoard();
-                drawSnake();
-                animation();
-                moveSnake();
-                drawFood();
-
-            }, 100);
+        if ((e.keyCode === 40 && yVelocity === 0)) { // Down
+            xVelocity = 0;
+            yVelocity = cellSize;
         }
+    });
+}
 
 
-        function clearBoard(){
-            ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+      userInput();
+
+      function moveSnake() {
+        const head = { x: snake[0].x + xVelocity, y: snake[0].y + yVelocity };
+        snake.unshift(head);
+
+        if (snake[0].x == foodX && snake[0].y == foodY) {
+          score++;
+          food();
+        } else {
+          snake.pop();
         }
+      }
 
-
-        function drawSnake(){
-            snake.forEach((cell) => {
-            ctx.fillStyle = snakeColor;
-            ctx.fillRect(cell.x, cell.y, cellSize, cellSize);
-            ctx.strokeStyle = 'black';
-            ctx.strokeRect(cell.x, cell.y, cellSize, cellSize);
-            });
-        };
-
-
-        const goingUp = yVelocity == -cellSize;
-        const goingDown = yVelocity == cellSize;
-        const goingRight = xVelocity == cellSize;
-        const goingLeft = xVelocity == -cellSize;
-
-        function userInput(){
-            window.addEventListener('keydown', (e)=>{
-                if(e.keyCode === 37 && !goingRight){
-                    xVelocity -= cellSize;
-                    yVelocity = 0;
-                }
-                if(e.keyCode === 38 && !goingDown){
-                    yVelocity -= cellSize;
-                    xVelocity = 0;
-                }
-                if(e.keyCode === 39 && !goingLeft){
-                    xVelocity = cellSize;
-                    yVelocity = 0;
-                }
-                if(e.keyCode === 40 && !goingUp){ 
-                    yVelocity = cellSize;
-                    xVelocity = 0
-                }
-            })
-        }
-
-
-        userInput();
-
-        
-
-
-        function moveSnake(){
-            const head = {x: snake[0].x + xVelocity, y: snake[0].y + yVelocity};
-            snake.unshift(head);
-
-            if(snake[0]. x == foodX && snake[0].y == foodY){
-                score++;
-                food();
-            }
-            else{
-                snake.pop();
-            }
-        
-            
-        }
-    
-
-
-
-
-
-        
-
-
-
-        GameRunning();
+      GameRunning();
     </script>
-</body>
+  </body>
 </html>
